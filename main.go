@@ -30,6 +30,14 @@ func connect() {
 		panic(err)
 	}
 	db = db_local
+
+	err = db.Ping()
+	if err != nil {
+		fmt.Println(connStr)
+		fmt.Println(err.Error())
+		panic(err)
+	}
+	fmt.Println("Database connection successful")
 }
 
 func helloWorld(c *gin.Context) {

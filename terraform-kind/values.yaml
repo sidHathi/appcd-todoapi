@@ -1,0 +1,28 @@
+primary:
+  persistence:
+    enabled: true
+  initdb:
+    scripts:
+      01-init.sql: |
+        create database if not exists postgres with owner postgres;
+        create user postgres with password 'password';
+        grant all privileges on database postgres to postgres;
+        create table if not exists users(user_id text, user_name text);
+
+global:
+  postgresql:
+    auth:
+      postgresPassword: password
+      database: postgres
+      username: postgres
+      password: password
+  service:
+    ports:
+      postgresql: 5432
+
+auth:
+  enablePostgresUser: true
+  postgresPassword: password
+  username: postgres
+  password: password
+  database: postgres
