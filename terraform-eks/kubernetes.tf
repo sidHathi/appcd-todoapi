@@ -29,8 +29,7 @@ resource "kubernetes_deployment" "todo-api-deployment" {
       spec {
         container {
           name  = "todo-api"
-          image = "sidhathi/appcd-todo:latest"
-          image_pull_policy = "IfNotPresent"
+          image = "public.ecr.aws/i6d4f2c8/sidhathi:latest"
 
           port {
             container_port = 8000
@@ -98,10 +97,11 @@ resource "kubernetes_service" "todo-api-service" {
       target_port = 8000
     }
 
-    type = "ClusterIP"
+    type = "LoadBalancer"
   }
 }
 
 output "lb_ip" {
-  value = kubernetes_service.todo-api-service.status.0.load_balancer.0.ingress.0.hostname
+  value = length(kubernetes_service.todo-api-service.status[0].load_balancer[0].ingress) > 0 ? kubernetes_service.todo-api-service.status[0].load_balancer[0].ingress[0].hostname : "Pending"
+  depends_on = [kubernetes_service.todo-api-service]
 }
