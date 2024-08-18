@@ -7,19 +7,34 @@ import (
 	"github.com/google/uuid"
 )
 
-func CreateNewList(name string, userId string) (*models.TodoList, error) {
+func CreateNewList(data models.CreateTodoListData, userId string) (*models.TodoList, error) {
 	id := uuid.NewString()
-	_, err := db.Db.Exec("insert into todo_lists (id, name, created_by) values ($1, '$2', '$3');", id, name, userId)
+	_, err := db.Db.Exec("insert into todo_lists (id, name, created_by) values ($1, '$2', '$3');", id, data.Name, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Db.Exec("insert into user_todo_lists (user_id, list_id) values ($1, $2);", userId, id)
 	if err != nil {
 		return nil, err
 	}
 
 	return &models.TodoList{
 		Id:        id,
-		Name:      name,
+		Name:      data.Name,
 		CreatedBy: userId,
 		Items:     []models.TodoItem{},
 	}, nil
+}
+
+func ShareList(userId string, listId string, recipientId string) error {
+	_, err := db.Db.Query("select * from usr_todo_lists where user_id='$1' and list_id='$2';", userId, listId)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Db.Exec("insert into user_todo_lists (user_id, list_id) values ($1, $2);", userId, listId)
+	return err
 }
 
 func GetListById(userId string, listId string) (*models.TodoList, error) {

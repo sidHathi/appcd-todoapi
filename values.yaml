@@ -10,7 +10,6 @@ primary:
         create table if not exists todo_items(id text primary key, list_id text not null, description text, parent_id text);
         create table if not exists attachments(id text primary key, list_id text not null, item_id text not null, s3_url text not null);
         create table if not exists user_todo_lists(user_id text not null, list_id text not null);
-        create table if not exists user_todo_items(user_id text not null, item_id text not null);
 
 global:
   postgresql:
