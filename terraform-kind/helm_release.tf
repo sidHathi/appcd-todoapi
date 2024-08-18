@@ -7,6 +7,6 @@ resource "helm_release" "my-postgres" {
   timeout = 60
 
   values = [
-    file("${path.module}/values.yaml")
+    file("${path.module}/../values.yaml")
   ]
 }

@@ -115,6 +115,7 @@ data "terraform_remote_state" "eks" {
   config = {
     path = "${path.module}/terraform.tfstate"
   }
+  depends_on = [ module.eks ]
 }
 
 data "aws_eks_cluster" "cluster" {

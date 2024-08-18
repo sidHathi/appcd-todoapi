@@ -1,0 +1,31 @@
+primary:
+  persistence:
+    enabled: true
+  initdb:
+    scripts:
+      01-init.sql: |
+        create database if not exists postgres with owner postgres;
+        create table if not exists users(id text primary key, name text);
+        create table if not exists todo_lists(id text primary key, name text, created_by text);
+        create table if not exists todo_items(id text primary key, list_id text not null, description text, parent_id text);
+        create table if not exists attachments(id text primary key, list_id text not null, item_id text not null, s3_url text not null);
+        create table if not exists user_todo_lists(user_id text not null, list_id text not null);
+        create table if not exists user_todo_items(user_id text not null, item_id text not null);
+
+global:
+  postgresql:
+    auth:
+      postgresPassword: password
+      database: postgres
+      username: postgres
+      password: password
+  service:
+    ports:
+      postgresql: 5432
+
+auth:
+  enablePostgresUser: true
+  postgresPassword: password
+  username: postgres
+  password: password
+  database: postgres

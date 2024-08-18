@@ -1,1 +1,0 @@
-create table users(user_id text, user_name text);
