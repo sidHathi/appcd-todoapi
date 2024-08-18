@@ -8,3 +8,7 @@ type TodoItem struct {
 	SubItems []TodoItem `json:"sub_items"`
 	ParentId string `json:"parent_id"` // empty if no parent
 }
+
+type CreateTodoItemData struct {
+	Description string `json:"description"`
+}
