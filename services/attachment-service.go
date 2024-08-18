@@ -29,8 +29,8 @@ func AddAttachment(itemId string, attachmentData models.CreateAttachmentData) (*
 	return &att, nil
 }
 
-func UpdateAttachment(attachmentId string, newUrl string) error {
-	_, err := db.Db.Exec("update attachments set s3_url='$1' where id=$2", newUrl, attachmentId)
+func UpdateAttachment(attachmentId string, updateData models.CreateAttachmentData) error {
+	_, err := db.Db.Exec("update attachments set s3_url='$1' where id=$2", updateData.S3Url, attachmentId)
 	return err
 }
 

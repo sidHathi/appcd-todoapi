@@ -16,3 +16,7 @@ type TodoListSqlRow struct {
 	Name      string `json:"name"`
 	CreatedBy string `json:"CreatedBy"`
 }
+
+type ShareListData struct {
+	RecipientId string `json:"recipientId"`
+}

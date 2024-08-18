@@ -17,7 +17,6 @@ func CreateUser(c *gin.Context) {
 		c.AbortWithStatusJSON(400, "No body provided for request")
 		return
 	}
-
 	err = json.Unmarshal(data, &body)
 	if err != nil || body.Name == "" {
 		c.AbortWithStatusJSON(400, "Invalid input")

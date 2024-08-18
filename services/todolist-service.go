@@ -90,11 +90,11 @@ func GetListById(userId string, listId string) (*models.TodoList, error) {
 }
 
 // TODO:
-func UpdateListDetails(userId string, listId string, newName string) error {
-	if newName == "" {
+func UpdateListDetails(userId string, listId string, updateData models.CreateTodoListData) error {
+	if updateData.Name == "" {
 		return nil
 	}
-	_, err := db.Db.Exec("update todo_lists tl set tl.name='$1' from user_todo_lists utl where tl.id = $2 and utl.user_id=$3 and utl.list_id=$4;", newName, listId, userId, listId)
+	_, err := db.Db.Exec("update todo_lists tl set tl.name='$1' from user_todo_lists utl where tl.id = $2 and utl.user_id=$3 and utl.list_id=$4;", updateData.Name, listId, userId, listId)
 	return err
 }
 

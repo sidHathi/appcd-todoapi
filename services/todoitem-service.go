@@ -81,8 +81,8 @@ func AddSubItem(item_id string, itemData models.CreateTodoItemData) (*models.Tod
 	return &subItem, nil
 }
 
-func UpdateItem(itemId string, updatedDescription string) error {
-	_, err := db.Db.Exec("update todo_items set description='$1' where id=$2", updatedDescription, itemId)
+func UpdateItem(itemId string, updateData models.CreateTodoItemData) error {
+	_, err := db.Db.Exec("update todo_items set description='$1' where id=$2", updateData.Description, itemId)
 	return err
 }
 
