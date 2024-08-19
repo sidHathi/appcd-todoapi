@@ -1,6 +1,12 @@
 go.mod
 go.sum
 kubectl
+.env
+
+# test sql data
+tests/postgres_data
+tests/postgres_data/*
+tests/postgres_data/**
 
 # Local .terraform directories
 **/.terraform/*

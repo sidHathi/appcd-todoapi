@@ -1,0 +1,686 @@
+definitions:
+  models.Attachment:
+    properties:
+      file_type:
+        type: string
+      id:
+        type: string
+      list_id:
+        type: string
+      s3_url:
+        type: string
+      todo_item_id:
+        type: string
+    type: object
+  models.CreateAttachmentData:
+    properties:
+      file_type:
+        type: string
+      s3_url:
+        type: string
+    type: object
+  models.CreateTodoItemData:
+    properties:
+      description:
+        type: string
+    type: object
+  models.CreateTodoListData:
+    properties:
+      name:
+        type: string
+    type: object
+  models.CreateUserModel:
+    properties:
+      name:
+        type: string
+    type: object
+  models.ShareListData:
+    properties:
+      recipientId:
+        type: string
+    type: object
+  models.TodoItem:
+    properties:
+      attachments:
+        items:
+          $ref: '#/definitions/models.Attachment'
+        type: array
+      complete:
+        type: boolean
+      description:
+        type: string
+      id:
+        type: string
+      list_id:
+        type: string
+      parent_id:
+        description: empty if no parent
+        type: string
+      sub_items:
+        items:
+          $ref: '#/definitions/models.TodoItem'
+        type: array
+    type: object
+  models.TodoItemCompletionUpdate:
+    properties:
+      complete:
+        type: boolean
+    type: object
+  models.TodoList:
+    properties:
+      CreatedBy:
+        type: string
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/models.TodoItem'
+        type: array
+      name:
+        type: string
+    type: object
+  models.User:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /attachments/{id}:
+    delete:
+      description: Delete an existing attachment by its ID
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Attachment deleted successfully
+          schema:
+            type: string
+        "400":
+          description: Error deleting attachment
+          schema:
+            type: string
+        "404":
+          description: Attachment not found
+          schema:
+            type: string
+      summary: Delete an attachment
+      tags:
+      - attachments
+    put:
+      consumes:
+      - application/json
+      description: Update the details of an existing attachment
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated attachment data
+        in: body
+        name: attachment
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAttachmentData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Attachment updated successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid input or error updating attachment
+          schema:
+            type: string
+        "404":
+          description: Attachment not found
+          schema:
+            type: string
+      summary: Update an existing attachment
+      tags:
+      - attachments
+  /todo-item/{id}:
+    delete:
+      description: Delete an existing to-do item by its ID
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Item deleted successfully
+          schema:
+            type: string
+        "400":
+          description: Error deleting item
+          schema:
+            type: string
+        "404":
+          description: Todo item not found
+          schema:
+            type: string
+      summary: Delete a to-do item
+      tags:
+      - todo-items
+    get:
+      description: Retrieve a specific to-do item by its ID
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Retrieved to-do item
+          schema:
+            $ref: '#/definitions/models.TodoItem'
+        "400":
+          description: Error retrieving item
+          schema:
+            type: string
+        "404":
+          description: Todo item not found
+          schema:
+            type: string
+      summary: Get a to-do item
+      tags:
+      - todo-items
+    put:
+      consumes:
+      - application/json
+      description: Update the details of an existing to-do item
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated to-do item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTodoItemData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Item updated successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid input or error updating item
+          schema:
+            type: string
+        "404":
+          description: Todo item not found
+          schema:
+            type: string
+      summary: Update a to-do item
+      tags:
+      - todo-items
+  /todo-item/{id}/completion:
+    put:
+      consumes:
+      - application/json
+      description: Update the completion status of a to-do item
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: To-do item completion status update
+        in: body
+        name: completion
+        required: true
+        schema:
+          $ref: '#/definitions/models.TodoItemCompletionUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Completion status updated
+          schema:
+            $ref: '#/definitions/models.TodoItem'
+        "400":
+          description: Invalid input or error updating completion status
+          schema:
+            type: string
+        "404":
+          description: Todo item not found
+          schema:
+            type: string
+      summary: Set to-do item completion status
+      tags:
+      - todo-items
+  /todo-item/{id}/sub-item:
+    post:
+      consumes:
+      - application/json
+      description: Add a new sub-item to an existing to-do item
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: To-do sub-item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTodoItemData'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Sub-item added successfully
+          schema:
+            $ref: '#/definitions/models.TodoItem'
+        "400":
+          description: Invalid input or error adding sub-item
+          schema:
+            type: string
+        "404":
+          description: Todo item not found
+          schema:
+            type: string
+      summary: Add a sub-item to a to-do item
+      tags:
+      - todo-items
+  /todo-items/:id/attachments:
+    post:
+      consumes:
+      - application/json
+      description: Add a new attachment to an existing to-do item
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Attachment data
+        in: body
+        name: attachment
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAttachmentData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Attachment added successfully
+          schema:
+            $ref: '#/definitions/models.Attachment'
+        "400":
+          description: Invalid input or error adding attachment
+          schema:
+            type: string
+        "404":
+          description: Todo item not found
+          schema:
+            type: string
+      summary: Add an attachment to a to-do item
+      tags:
+      - attachments
+  /users:
+    get:
+      description: Retrieve a list of all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "400":
+          description: Error retrieving users
+          schema:
+            type: string
+      summary: Get a list of users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with the provided information
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserModel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid input or error creating user
+          schema:
+            type: string
+      summary: Create a new user
+      tags:
+      - users
+  /users/{userId}:
+    delete:
+      description: Delete an existing user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            type: string
+        "400":
+          description: Error deleting user
+          schema:
+            type: string
+      summary: Delete a user
+      tags:
+      - users
+    get:
+      description: Retrieve a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Error retrieving user
+          schema:
+            type: string
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: Get a user by ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update the information of an existing user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Updated user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreateUserModel'
+        "400":
+          description: Invalid input or error updating user
+          schema:
+            type: string
+      summary: Update a user
+      tags:
+      - users
+  /users/{userId}/todo-lists:
+    get:
+      description: Retrieve a list of to-do lists associated with the specified user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of to-do list IDs
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Error retrieving to-do lists
+          schema:
+            type: string
+      summary: Get user's to-do lists
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new to-do list for a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: To-do list data
+        in: body
+        name: list
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTodoListData'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: List created successfully
+          schema:
+            $ref: '#/definitions/models.TodoList'
+        "400":
+          description: Invalid input or error creating list
+          schema:
+            type: string
+      summary: Create a new to-do list
+      tags:
+      - todo-lists
+  /users/{userId}/todo-lists/{listId}:
+    delete:
+      description: Delete an existing to-do list by its ID
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: List ID
+        in: path
+        name: listId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List deleted
+          schema:
+            type: string
+        "400":
+          description: Error deleting list
+          schema:
+            type: string
+      summary: Delete a to-do list
+      tags:
+      - todo-lists
+    get:
+      description: Retrieve a specific to-do list by its ID and the user's ID
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: List ID
+        in: path
+        name: listId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Retrieved to-do list
+          schema:
+            $ref: '#/definitions/models.TodoList'
+        "400":
+          description: Error retrieving list
+          schema:
+            type: string
+      summary: Get a specific to-do list
+      tags:
+      - todo-lists
+    put:
+      consumes:
+      - application/json
+      description: Update the details of an existing to-do list
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: List ID
+        in: path
+        name: listId
+        required: true
+        type: string
+      - description: Updated to-do list data
+        in: body
+        name: list
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTodoListData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List updated
+          schema:
+            type: string
+        "400":
+          description: Invalid input or error updating list
+          schema:
+            type: string
+      summary: Update a to-do list
+      tags:
+      - todo-lists
+  /users/{userId}/todo-lists/{listId}/items:
+    post:
+      consumes:
+      - application/json
+      description: Add a new item to an existing to-do list
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: List ID
+        in: path
+        name: listId
+        required: true
+        type: string
+      - description: To-do item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTodoItemData'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Item added successfully
+          schema:
+            $ref: '#/definitions/models.TodoItem'
+        "400":
+          description: Invalid input or error adding item
+          schema:
+            type: string
+      summary: Add an item to a to-do list
+      tags:
+      - todo-lists
+  /users/{userId}/todo-lists/{listId}/share:
+    post:
+      consumes:
+      - application/json
+      description: Share a specific to-do list with another user by providing their
+        user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: List ID
+        in: path
+        name: listId
+        required: true
+        type: string
+      - description: Share list data
+        in: body
+        name: share
+        required: true
+        schema:
+          $ref: '#/definitions/models.ShareListData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List shared successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid input or error sharing list
+          schema:
+            type: string
+      summary: Share a to-do list with another user
+      tags:
+      - todo-lists
+swagger: "2.0"

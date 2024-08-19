@@ -11,7 +11,12 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy the source code into the container
-COPY . .
+COPY ./models ./models
+COPY ./controllers ./controllers
+COPY ./services ./services
+COPY ./db ./db
+COPY ./docs ./docs
+COPY main.go .
 
 # Build the Go app
 RUN go build -o main .

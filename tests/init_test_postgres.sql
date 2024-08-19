@@ -1,0 +1,12 @@
+CREATE ROLE postgres WITH LOGIN PASSWORD 'testpass';
+create database postgres with owner postgres;
+create table if not exists users(id text primary key, name text);
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE users TO postgres;
+create table if not exists todo_lists(id text primary key, name text, created_by text);
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE todo_lists TO postgres;
+create table if not exists todo_items(id text primary key, list_id text not null, description text, complete boolean not null, parent_id text);
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE todo_items TO postgres;
+create table if not exists attachments(id text primary key, list_id text not null, item_id text not null, s3_url text not null, file_type text);
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE attachments TO postgres;
+create table if not exists user_todo_lists(user_id text not null, list_id text not null, CONSTRAINT unique_pairing UNIQUE (user_id, list_id));
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE user_todo_lists TO postgres;
