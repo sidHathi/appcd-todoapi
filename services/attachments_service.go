@@ -1,22 +1,23 @@
 package services
 
 import (
-	"fmt"
 	"todo-api/db"
 	"todo-api/models"
 
 	"github.com/google/uuid"
 )
 
+// Add an attachment to an item
 func AddAttachment(itemId string, attachmentData models.CreateAttachmentData) (*models.Attachment, error) {
+	// check to make sure the item exists
 	var list_id string
 	itemRow := db.Db.QueryRow("select list_id from todo_items where id=$1;", itemId)
 	err := itemRow.Scan(&list_id)
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, err
 	}
 
+	// create and add the attachment to the db
 	atid := uuid.NewString()
 	att := models.Attachment{
 		Id:         atid,
@@ -32,6 +33,7 @@ func AddAttachment(itemId string, attachmentData models.CreateAttachmentData) (*
 	return &att, nil
 }
 
+// get an attachment by its id
 func GetAttachment(attachmentId string) (*models.Attachment, error) {
 	var att models.Attachment
 	row := db.Db.QueryRow("select item_id, list_id, s3_url, file_type from attachments where id=$1;", attachmentId)
@@ -44,12 +46,15 @@ func GetAttachment(attachmentId string) (*models.Attachment, error) {
 	return &att, nil
 }
 
+// update an attachment
 func UpdateAttachment(attachmentId string, updateData models.CreateAttachmentData) error {
+	// check to make sure it exists
 	currAtt, err := GetAttachment(attachmentId)
 	if err != nil {
 		return err
 	}
 
+	// check to make sure the updateData is populated
 	newUrl := currAtt.S3Url
 	if updateData.S3Url != "" {
 		newUrl = updateData.S3Url
@@ -58,10 +63,12 @@ func UpdateAttachment(attachmentId string, updateData models.CreateAttachmentDat
 	if updateData.FileType != "" {
 		newUrl = updateData.FileType
 	}
+	// perform the sql query
 	_, err = db.Db.Exec("update attachments set s3_url=$1, file_type=$2 where id=$3", newUrl, newFileType, attachmentId)
 	return err
 }
 
+// delete an attachment
 func DeleteAttachment(id string) error {
 	_, err := GetAttachment(id)
 	if err != nil {

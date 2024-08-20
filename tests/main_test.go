@@ -16,9 +16,11 @@ func TestMain(m *testing.M) {
 		fmt.Println("No .env file found, using default environment variables")
 	}
 
+	// set up database
 	db.ConnectForTesting()
 	defer db.CleanTestDB()
 
+	// run tests
 	code := m.Run()
 	os.Exit(code)
 }

@@ -26,12 +26,10 @@ func TestGetItem(t *testing.T) {
 		c, _ := gin.CreateTestContext(w)
 		c.Params = gin.Params{{Key: "id", Value: "ti_1"}}
 		c.Request = req
-		t.Log("Executing get request!")
 
 		controllers.GetItem(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		t.Log("Item found executed get with status 200!")
 		var response models.TodoItemNoNest
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
@@ -143,7 +141,6 @@ func TestSetItemCompletion(t *testing.T) {
 
 		var response models.TodoItem
 		err := json.Unmarshal(w.Body.Bytes(), &response)
-		t.Log(response)
 		assert.NoError(t, err)
 		assert.True(t, response.Complete)
 	})

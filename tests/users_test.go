@@ -18,7 +18,7 @@ func TestCreateUser(t *testing.T) {
 	db.CleanTestDB()
 	db.LoadTestData()
 	gin.SetMode(gin.TestMode)
-	
+
 	t.Run("successful creation", func(t *testing.T) {
 		body := `{"name": "John Doe"}`
 		req, _ := http.NewRequest(http.MethodPost, "/users", strings.NewReader(body))
@@ -57,7 +57,7 @@ func TestGetUserById(t *testing.T) {
 	db.CleanTestDB()
 	db.LoadTestData()
 	gin.SetMode(gin.TestMode)
-	
+
 	t.Run("user found", func(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodGet, "/users/tu_1", nil)
 		w := httptest.NewRecorder()
@@ -92,7 +92,7 @@ func TestUpdateUser(t *testing.T) {
 	db.CleanTestDB()
 	db.LoadTestData()
 	gin.SetMode(gin.TestMode)
-	
+
 	t.Run("successful update", func(t *testing.T) {
 		body := `{"name": "Jane Doe"}`
 		req, _ := http.NewRequest(http.MethodPut, "/users/test_id", strings.NewReader(body))
@@ -133,7 +133,7 @@ func TestDeleteUser(t *testing.T) {
 	db.CleanTestDB()
 	db.LoadTestData()
 	gin.SetMode(gin.TestMode)
-	
+
 	t.Run("successful deletion", func(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodDelete, "/users/test_id", nil)
 		w := httptest.NewRecorder()

@@ -71,7 +71,6 @@ func TestUpdateAttachment(t *testing.T) {
 
 		controllers.UpdateAttachment(c)
 
-		t.Log(w.Body)
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
 

@@ -16,11 +16,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMultiNestedItemLists(t *testing.T) {
+func TestNestedItemLists(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	db.CleanTestDB()
 	db.LoadTestData()
 
+	// this data is consistent across all the nested item tests
 	userId := "tu_1"
 	listId := "tl_4"
 	createItemPath := fmt.Sprintf("/users/%s/lists/%s/items", userId, listId)
@@ -29,8 +30,8 @@ func TestMultiNestedItemLists(t *testing.T) {
 	var item2Id string
 	var item3Id string
 
-	t.Run("successful creation of multi tiered list item structure", func (t *testing.T) {
-		// Assuming userId 1 and listId 2 exist in your test database
+	t.Run("successful creation of multi tiered list item structure", func(t *testing.T) {
+		// add the first nested item
 		reqBody := `{"description": "Test Item 1"}`
 		req, _ := http.NewRequest(http.MethodPost, createItemPath, bytes.NewBuffer([]byte(reqBody)))
 		req.Header.Set("Content-Type", "application/json")
@@ -47,6 +48,7 @@ func TestMultiNestedItemLists(t *testing.T) {
 		assert.NoError(t, err)
 		item1Id = response.Id
 
+		// add the second one as a sub item of the first
 		subItemPath := fmt.Sprintf("/items/%s", item1Id)
 		reqBody = `{"description": "Test Item 2"}`
 		req, _ = http.NewRequest(http.MethodPost, subItemPath, bytes.NewBuffer([]byte(reqBody)))
@@ -63,6 +65,7 @@ func TestMultiNestedItemLists(t *testing.T) {
 		assert.NoError(t, err)
 		item2Id = response.Id
 
+		// add the third as a sub item of the second
 		subItemPath = fmt.Sprintf("/items/%s", item2Id)
 		reqBody = `{"description": "Test Item 3"}`
 		req, _ = http.NewRequest(http.MethodPost, subItemPath, bytes.NewBuffer([]byte(reqBody)))
@@ -79,6 +82,7 @@ func TestMultiNestedItemLists(t *testing.T) {
 		assert.NoError(t, err)
 		item3Id = response.Id
 
+		// get the list
 		req, _ = http.NewRequest(http.MethodGet, getListPath, nil)
 		w = httptest.NewRecorder()
 		c, _ = gin.CreateTestContext(w)
@@ -91,8 +95,8 @@ func TestMultiNestedItemLists(t *testing.T) {
 		var list models.TodoList
 		err = json.Unmarshal(w.Body.Bytes(), &list)
 		assert.NoError(t, err)
-		t.Log(list)
 
+		// check that the response json contains the correctly nested lists
 		assert.NotEmpty(t, list.Items)
 		assert.Equal(t, list.Items[0].Id, item1Id)
 		assert.NotEmpty(t, list.Items[0].SubItems)
@@ -101,7 +105,8 @@ func TestMultiNestedItemLists(t *testing.T) {
 		assert.Equal(t, list.Items[0].SubItems[0].SubItems[0].Id, item3Id)
 	})
 
-	t.Run("successful completion of layered list items", func (t *testing.T) {
+	t.Run("successful completion of layered list items", func(t *testing.T) {
+		// send a request to complete the top level list item
 		completionPath := fmt.Sprintf("/items/%s/completion", item1Id)
 		body := `{"complete": true}`
 		req, _ := http.NewRequest(http.MethodPut, completionPath, bytes.NewBuffer([]byte(body)))
@@ -124,6 +129,7 @@ func TestMultiNestedItemLists(t *testing.T) {
 		controllers.GetList(c)
 		assert.Equal(t, http.StatusOK, w.Code)
 
+		// check that all its children are completed as well
 		var list models.TodoList
 		err := json.Unmarshal(w.Body.Bytes(), &list)
 		assert.NoError(t, err)
@@ -134,6 +140,7 @@ func TestMultiNestedItemLists(t *testing.T) {
 		assert.NotEmpty(t, list.Items[0].SubItems[0].SubItems)
 		assert.True(t, list.Items[0].SubItems[0].SubItems[0].Complete)
 
+		// send a request to mark the second level item as incomplete
 		completionPath = fmt.Sprintf("/items/%s/completion", item2Id)
 		body = `{"complete": false}`
 		req, _ = http.NewRequest(http.MethodPut, completionPath, bytes.NewBuffer([]byte(body)))
@@ -153,6 +160,7 @@ func TestMultiNestedItemLists(t *testing.T) {
 		c.Params = gin.Params{{Key: "userId", Value: userId}, {Key: "listId", Value: listId}}
 		c.Request = req
 
+		// check that that its parent is not complete but its child still is
 		controllers.GetList(c)
 		assert.Equal(t, http.StatusOK, w.Code)
 		err = json.Unmarshal(w.Body.Bytes(), &list)
@@ -162,7 +170,8 @@ func TestMultiNestedItemLists(t *testing.T) {
 		assert.True(t, list.Items[0].SubItems[0].SubItems[0].Complete)
 	})
 
-	t.Run("successful deletion of layered list items", func (t *testing.T) {
+	t.Run("successful deletion of layered list items", func(t *testing.T) {
+		// delete the top level item
 		deletionPath := fmt.Sprintf("/items/%s", item1Id)
 		req, _ := http.NewRequest(http.MethodDelete, deletionPath, nil)
 		w := httptest.NewRecorder()
@@ -193,6 +202,7 @@ func TestMultiNestedItemLists(t *testing.T) {
 		c.Params = gin.Params{{Key: "id", Value: item3Id}}
 		c.Request = req
 
+		// make sure that its children no longer exist
 		controllers.GetItem(c)
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
@@ -205,7 +215,7 @@ func TestListSharingDeletions(t *testing.T) {
 
 	// share a list with another user - then that user deletes their account
 	// list should still be available for other use
-	// when the last user deletes their account the list should finally disappear// Assuming userId 1, listId 2, and recipientId 3 exist in your test database
+	// when the last user deletes their account the list should finally disappear
 	reqBody := `{"recipientId": "tu_2"}`
 	req, _ := http.NewRequest(http.MethodPost, "/users/tu_1/lists/tl_1/share", bytes.NewBuffer([]byte(reqBody)))
 	req.Header.Set("Content-Type", "application/json")
@@ -223,20 +233,15 @@ func TestListSharingDeletions(t *testing.T) {
 	err := services.DeleteUser("tu_1")
 	assert.NoError(t, err)
 
-	list, err := services.GetListById("tu_2", "tl_1")
-	assert.NoError(t, err)
-	t.Log(list)
-
-	tu2Lists, err := services.GetUserListIds("tu_2")
-	assert.NoError(t, err)
-	t.Log(tu2Lists)
+	var listId string
+	row := db.Db.QueryRow("select id from todo_lists where id=$1", "tl_1")
+	err = row.Scan(&listId)
+	assert.NoError(t, err) // want to make sure list still exists
 
 	err = services.DeleteUser("tu_2")
 	assert.NoError(t, err)
 
-	var listId string
-	row := db.Db.QueryRow("select id from todo_lists where id=$1", "tl_1")
+	row = db.Db.QueryRow("select id from todo_lists where id=$1", "tl_1")
 	err = row.Scan(&listId)
-	t.Log(listId)
 	assert.Error(t, err) // want to make sure list is gone now
 }

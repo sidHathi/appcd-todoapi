@@ -1,31 +1,29 @@
 package services
 
 import (
-	"fmt"
 	"todo-api/db"
 	"todo-api/models"
 
 	"github.com/google/uuid"
 )
 
+// Fetch an item by its id
 func GetItemById(itemId string) (*models.TodoItemNoNest, error) {
+	// Get the item info
 	var id string
 	var listId string
 	var complete bool
 	var description string
 	var parentId string
-	fmt.Println("running get item service with id " + itemId)
 	itemRow := db.Db.QueryRow("select id, list_id, description, complete, parent_id from todo_items where id=$1;", itemId)
 	err := itemRow.Scan(&id, &listId, &description, &complete, &parentId)
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, err
 	}
 
-	fmt.Println("Line 24")
+	// Get the ids of its children
 	subItemIdRows, err := db.Db.Query("select id from todo_items where parent_id=$1;", itemId)
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, err
 	}
 	sIds := []string{}
@@ -38,10 +36,9 @@ func GetItemById(itemId string) (*models.TodoItemNoNest, error) {
 		sIds = append(sIds, sid)
 	}
 
-	fmt.Println("Line 40")
+	// fetch its attachments
 	attachmentRows, err := db.Db.Query("select id, list_id, item_id, s3_url from attachments where item_id=$1", itemId)
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, err
 	}
 	attachments := []models.Attachment{}
@@ -54,16 +51,6 @@ func GetItemById(itemId string) (*models.TodoItemNoNest, error) {
 		attachments = append(attachments, attachment)
 	}
 
-	fmt.Println("Line 55")
-	fmt.Println(models.TodoItemNoNest{
-		Id:          id,
-		ListId:      listId,
-		Description: description,
-		Complete:    complete,
-		Attachments: attachments,
-		SubItemIds:  sIds,
-		ParentId:    parentId,
-	})
 	return &models.TodoItemNoNest{
 		Id:          id,
 		ListId:      listId,
@@ -75,7 +62,9 @@ func GetItemById(itemId string) (*models.TodoItemNoNest, error) {
 	}, nil
 }
 
+// Add a child (sub item) to a todo-list item
 func AddSubItem(item_id string, itemData models.CreateTodoItemData) (*models.TodoItemNoNest, error) {
+	// fetch the list id of the parent item (also verifies the parent exists)
 	var listId string
 	parentRow := db.Db.QueryRow("select list_id from todo_items where id=$1;", item_id)
 	err := parentRow.Scan(&listId)
@@ -83,6 +72,7 @@ func AddSubItem(item_id string, itemData models.CreateTodoItemData) (*models.Tod
 		return nil, err
 	}
 
+	// create and add the new item to the db
 	sid := uuid.NewString()
 	subItem := models.TodoItemNoNest{
 		Id:          sid,
@@ -101,6 +91,7 @@ func AddSubItem(item_id string, itemData models.CreateTodoItemData) (*models.Tod
 	return &subItem, nil
 }
 
+// Set an item's completion
 func SetItemCompletion(itemId string, completionPayload models.TodoItemCompletionUpdate) (*models.TodoItemNoNest, error) {
 	item, err := GetItemById(itemId)
 	if err != nil {
@@ -125,12 +116,15 @@ func SetItemCompletion(itemId string, completionPayload models.TodoItemCompletio
 	return item, nil
 }
 
+// Update an item based on its id
 func UpdateItem(itemId string, updateData models.CreateTodoItemData) error {
+	// check that the item exists
 	curr, err := GetItemById(itemId)
 	if err != nil {
 		return err
 	}
 
+	// make sure the update fields are populated
 	newDescription := curr.Description
 	if updateData.Description != "" {
 		newDescription = updateData.Description
@@ -139,16 +133,20 @@ func UpdateItem(itemId string, updateData models.CreateTodoItemData) error {
 	return err
 }
 
+// Delete an item
 func DeleteItem(itemId string) error {
+	// make sure it exists
 	item, err := GetItemById(itemId)
 	if err != nil {
 		return err
 	}
 
+	// delete its children
 	for _, childId := range item.SubItemIds {
 		DeleteItem(childId)
 	}
 
+	// delete the item
 	_, err = db.Db.Exec("delete from todo_items where id=$1;", itemId)
 	return err
 }

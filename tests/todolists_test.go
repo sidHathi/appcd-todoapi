@@ -19,7 +19,6 @@ func TestCreateList(t *testing.T) {
 	db.CleanTestDB()
 	db.LoadTestData()
 	t.Run("successful list creation", func(t *testing.T) {
-		// Assuming userId 1 exists in your test database
 		reqBody := `{"name": "New Test List"}`
 		req, _ := http.NewRequest(http.MethodPost, "/users/tu_1/lists", bytes.NewBuffer([]byte(reqBody)))
 		req.Header.Set("Content-Type", "application/json")
@@ -47,7 +46,6 @@ func TestCreateList(t *testing.T) {
 
 func TestShareList(t *testing.T) {
 	t.Run("successful list sharing", func(t *testing.T) {
-		// Assuming userId 1, listId 2, and recipientId 3 exist in your test database
 		reqBody := `{"recipientId": "tu_2"}`
 		req, _ := http.NewRequest(http.MethodPost, "/users/tu_1/lists/tl_1/share", bytes.NewBuffer([]byte(reqBody)))
 		req.Header.Set("Content-Type", "application/json")
@@ -71,7 +69,6 @@ func TestShareList(t *testing.T) {
 
 func TestGetList(t *testing.T) {
 	t.Run("successful list retrieval", func(t *testing.T) {
-		// Assuming userId 1 and listId 2 exist in your test database
 		req, _ := http.NewRequest(http.MethodGet, "/users/tu_1/lists/tl_2", nil)
 
 		w := httptest.NewRecorder()
@@ -92,7 +89,6 @@ func TestGetList(t *testing.T) {
 
 func TestUpdateList(t *testing.T) {
 	t.Run("successful list update", func(t *testing.T) {
-		// Assuming userId 1 and listId 2 exist in your test database
 		reqBody := `{"name": "Updated Test List"}`
 		req, _ := http.NewRequest(http.MethodPut, "/users/tu_1/lists/tl_2", bytes.NewBuffer([]byte(reqBody)))
 		req.Header.Set("Content-Type", "application/json")
@@ -116,7 +112,6 @@ func TestUpdateList(t *testing.T) {
 
 func TestAddListItem(t *testing.T) {
 	t.Run("successful item addition to list", func(t *testing.T) {
-		// Assuming userId 1 and listId 2 exist in your test database
 		reqBody := `{"description": "New Test Item"}`
 		req, _ := http.NewRequest(http.MethodPost, "/users/tu_1/lists/tl_1/items", bytes.NewBuffer([]byte(reqBody)))
 		req.Header.Set("Content-Type", "application/json")
@@ -144,7 +139,6 @@ func TestAddListItem(t *testing.T) {
 
 func TestDeleteList(t *testing.T) {
 	t.Run("successful list deletion", func(t *testing.T) {
-		// Assuming userId 1 and listId 2 exist in your test database
 		req, _ := http.NewRequest(http.MethodDelete, "/users/tu_2/lists/tl_3", nil)
 
 		w := httptest.NewRecorder()

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"todo-api/models"
 	"todo-api/services"
@@ -27,7 +26,6 @@ func GetItem(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("Item controller retrieving item with id " + itemId)
 	item, err := services.GetItemById(itemId)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
