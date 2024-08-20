@@ -73,16 +73,16 @@ func GetListById(userId string, listId string) (*models.TodoList, error) {
 	if err != nil {
 		return nil, err
 	}
-	var items []models.TodoItem
+	var items []models.NestingTodoItem
 	for itemRows.Next() {
-		var item models.TodoItem
+		var item models.NestingTodoItem
 		err := itemRows.Scan(&item.Id, &item.Description, &item.Complete, &item.ParentId)
 		if err != nil {
 			continue
 		}
 		item.ListId = listId
 		item.Attachments = []models.Attachment{}
-		item.SubItems = []models.TodoItem{}
+		item.SubItems = make(map[string]models.NestingTodoItem)
 		items = append(items, item)
 	}
 
@@ -195,13 +195,13 @@ func DeleteList(userId string, listId string) error {
 }
 
 // helper function - adds items to a list
-func addItemsToList(list *models.TodoList, items []models.TodoItem) {
-	var parentMap = make(map[string][]models.TodoItem)
-	var idMap = make(map[string]*models.TodoItem)
+func addItemsToList(list *models.TodoList, items []models.NestingTodoItem) {
+	var parentMap = make(map[string][]models.NestingTodoItem)
+	var idMap = make(map[string]*models.NestingTodoItem)
 	for idx, item := range items {
 		subItems, exists := parentMap[item.ParentId]
 		if !exists {
-			subItems = []models.TodoItem{}
+			subItems = []models.NestingTodoItem{}
 		}
 		subItems = append(subItems, item)
 		parentMap[item.ParentId] = subItems
@@ -217,10 +217,10 @@ func addItemsToList(list *models.TodoList, items []models.TodoItem) {
 // helper functions - nests a list of items using a relational map
 // between the parent items and their children and a relational map
 // between the item ids and the actual items
-func nestItems(parentMap map[string][]models.TodoItem, idMap map[string]*models.TodoItem) []models.TodoItem {
+func nestItems(parentMap map[string][]models.NestingTodoItem, idMap map[string]*models.NestingTodoItem) []models.TodoItem {
 	// want to start with items that have no children -
 	// add to their parents and keep going basically
-	noChildElems := []*models.TodoItem{}
+	noChildElems := []*models.NestingTodoItem{}
 	for _, item := range idMap {
 		_, exists := parentMap[item.Id]
 		if !exists {
@@ -228,7 +228,8 @@ func nestItems(parentMap map[string][]models.TodoItem, idMap map[string]*models.
 		}
 	}
 
-	topLevelItems := make(map[string]models.TodoItem)
+	// map ensures no duplication - the last item added should be the one with all the children
+	topLevelItems := make(map[string]models.NestingTodoItem)
 	itemsToNest := noChildElems // this functions as a queue
 	for len(itemsToNest) > 0 {
 		// we guarantee that currItem is populated with all its children
@@ -246,7 +247,9 @@ func nestItems(parentMap map[string][]models.TodoItem, idMap map[string]*models.
 
 		parent, exists := idMap[parentId]
 		if exists {
-			parent.SubItems = append(parent.SubItems, *currItem)
+			// ensure no duplicate subitems=
+			parent.SubItems[currItem.Id] = *currItem
+			// move parent to back of queue
 			itemsToNest = append(itemsToNest, parent)
 		} else {
 			// if its parent doesn't exist then it's not a subitem
@@ -256,14 +259,33 @@ func nestItems(parentMap map[string][]models.TodoItem, idMap map[string]*models.
 
 	items := []models.TodoItem{}
 	for _, val := range topLevelItems {
-		items = append(items, val)
+		item := convertNestingItem(val)
+		items = append(items, item)
 	}
 	return items
 }
 
+// converts a nesting NestingTodoItem into a TodoItem - subitems are stored
+// in a list rather than a dictionary
+func convertNestingItem(nestingItem models.NestingTodoItem) models.TodoItem {
+	subItems := []models.TodoItem{}
+	for _, val := range nestingItem.SubItems {
+		subItems = append(subItems, convertNestingItem(val))
+	}
+	return models.TodoItem{
+		Id:          nestingItem.Id,
+		ListId:      nestingItem.ListId,
+		Description: nestingItem.Description,
+		Complete:    nestingItem.Complete,
+		Attachments: nestingItem.Attachments,
+		SubItems:    subItems,
+		ParentId:    nestingItem.ParentId,
+	}
+}
+
 // Adds a list of attachments to a list of items based on the attachments
 // itemId fields
-func addAttachmentsToItems(items []models.TodoItem, attachments []models.Attachment) []models.TodoItem {
+func addAttachmentsToItems(items []models.NestingTodoItem, attachments []models.Attachment) []models.NestingTodoItem {
 	atItemMap := make(map[string][]models.Attachment)
 	for _, at := range attachments {
 		ats, exists := atItemMap[at.TodoItemId]
