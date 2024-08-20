@@ -15,7 +15,7 @@ import (
 )
 
 func helloWorld(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, "Hello world - successfully connected to postgres!")
+	c.IndentedJSON(http.StatusOK, "Welcome to my todo-list API - successfully connected to postgres!")
 }
 
 func main() {
