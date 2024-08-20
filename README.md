@@ -59,3 +59,20 @@ There are tests for each API endpoint - mainly to test that they function as exp
 ## OpenAPI Docs
 
 OpenAPI docs for this API were generated using the `go-swag` library which parses in-code annotations above each API route controller. Docs are served on the `/docs/index.html` route when the API is run
+
+## API Functionality
+
+This todo list API contains support for the following:
+* Creating, modifying, deleting, and retrieving users. Users are note expected to authenticate since that's outside the scope of this task. However, resources owned by a user can only be accessed through that use. I.E., you need to provide a user's id to have get any lists associated with that user
+* Creating, modifying, deleting, and retrieving todo-lists. Todo-lists are owned by users and constitute a certain number of items that a user has to complete
+* Creating, modifying, deleting, and retrieving todo-items. Todo-items are items in a todo list. They represent a task that the user needs to complete and can have sub-items and attachments associated with them. Sub-items are child items that are need to be completed in order for the parent to be complete. Attachments are references to file data that contain a url and a type
+* Infinite nesting of items. Since an item can have sub-items, and those sub-items can have their own sub-items, items can theoretically nest infinitely
+* Sharing todo lists between users. The todo-list/:listId/share endpoint can be used to give one user access to another's todo list
+
+## API Implementation
+
+The data underlying the todo-lists are stored in a postgres database hosted alongside the API. This schema diagram represent's the layout of the database's tables:
+
+![database layout](/appcd-todo-db.png)
+
+The controllers found in the [controllers](/controllers/) subdirectory contain code for handling user input and output through the API routes. Controllers are separated based on the type of resource they pertain to. The services, found in the [services](/services/) subdirectory contain code for updating and retrieving database information pertaining to each resource. The API is then deployed through the `main.go` class in the top level of the repo.
