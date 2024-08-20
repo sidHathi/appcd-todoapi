@@ -10,7 +10,7 @@ This repo contains:
 
 ## Usage and Deployment
 
-* To run the API locally, start a postgres server and enter the following info into a `.env` file at the top level of the codebase:
+* **To run the API locally,** start a postgres server and enter the following info into a `.env` file at the top level of the codebase:
 
 ```
 DB_USER="Your postgres user's username"
@@ -20,7 +20,8 @@ DB_NAME="The name of your database"
 DB_HOST="The host location of your database (i.e. localhost)"
 ```
 Once the env file is added, you can use the `go get .` and `go run .` to fetch packages and run the API respectively.
-* To run the API in a local, dockerized Kubernetes cluster:
+
+* **To run the API in a local, dockerized Kubernetes cluster:**
 1. Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start/), [kubectl](https://kind.sigs.k8s.io/docs/user/quick-start/), [the terraform cli](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli), and [docker](https://docs.docker.com/engine/install/)
 2. Create a local kind cluster using the config file found in the [terraform-kind](terraform-kind/) subdirectory of this repo. This can be done using the shell command `kind create cluster --config terraform-kind/kind-config.yaml`
 3. Run the shell command `docker build -t sidhathi/appcd-todo .` to build the kubernetes docker image
@@ -33,7 +34,7 @@ kubectl config config view --raw > kubeconfig
 terraform init
 terraform apply
 ```
-* To provision a paid AWS EKS cluster and deploy the API on that cluster:
+* **To provision a paid AWS EKS cluster and deploy the API on that cluster:**
 1. Install the aws cli, terraform, kubectl, and docker
 2. Authenticate into your aws and hashicorp accounts through the command line
 3. Run the following commands:
