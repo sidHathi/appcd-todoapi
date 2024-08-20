@@ -19,6 +19,7 @@ DB_PORT="The port on which the database is running"
 DB_NAME="The name of your database"
 DB_HOST="The host location of your database (i.e. localhost)"
 ```
+Once the env file is added, you can use the `go get .` and `go run .` to fetch packages and run the API respectively.
 * To run the API in a local, dockerized Kubernetes cluster:
 1. Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start/), [kubectl](https://kind.sigs.k8s.io/docs/user/quick-start/), [the terraform cli](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli), and [docker](https://docs.docker.com/engine/install/)
 2. Create a local kind cluster using the config file found in the [terraform-kind](terraform-kind/) subdirectory of this repo. This can be done using the shell command `kind create cluster --config terraform-kind/kind-config.yaml`
