@@ -5,7 +5,7 @@
 This repo contains:
 * An API for managing todo items and user todo lists written in Go
 * Automated tests for the API
-* IaC code written in terraform to deploy the API in a Kubernetes Cluster
+* IaC code written in Terraform to deploy the API in a Kubernetes cluster
 * Code to generate OpenAPI docs for the API
 
 ## Usage and Deployment
@@ -63,9 +63,9 @@ OpenAPI docs for this API were generated using the `go-swag` library which parse
 ## API Functionality
 
 This todo list API contains support for the following:
-* Creating, modifying, deleting, and retrieving users. Users are note expected to authenticate since that's outside the scope of this task. However, resources owned by a user can only be accessed through that use. I.E., you need to provide a user's id to have get any lists associated with that user
+* Creating, modifying, deleting, and retrieving users. Users are not expected to authenticate since that's outside the scope of this task. However, resources owned by a user can only be accessed through that use. I.E., you need to provide a user's id to have get any lists associated with that user
 * Creating, modifying, deleting, and retrieving todo-lists. Todo-lists are owned by users and constitute a certain number of items that a user has to complete
-* Creating, modifying, deleting, and retrieving todo-items. Todo-items are items in a todo list. They represent a task that the user needs to complete and can have sub-items and attachments associated with them. Sub-items are child items that are need to be completed in order for the parent to be complete. Attachments are references to file data that contain a url and a type
+* Creating, modifying, deleting, and retrieving todo-items. Todo-items are items in a todo list. They represent a task that the user needs to complete and can have sub-items and attachments associated with them. Sub-items are child items that need to be completed in order for the parent to be complete. Attachments are references to file data that contain a url and a type
 * Infinite nesting of items. Since an item can have sub-items, and those sub-items can have their own sub-items, items can theoretically nest infinitely
 * Sharing todo lists between users. The todo-list/:listId/share endpoint can be used to give one user access to another's todo list
 
