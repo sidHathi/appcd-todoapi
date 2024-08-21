@@ -69,6 +69,20 @@ func AddSubItem(c *gin.Context) {
 		return
 	}
 
+	// Check if a sub-item with the same title already exists
+	existingItem, err := services.GetSubItemByTitle(itemId, body.Title)
+	if err != nil {
+		c.AbortWithStatusJSON(500, err.Error())
+		return
+	}
+
+	if existingItem != nil {
+		// Sub-item already exists, return it
+		c.JSON(http.StatusOK, existingItem)
+		return
+	}
+
+	// Create a new sub-item
 	item, err := services.AddSubItem(itemId, body)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
