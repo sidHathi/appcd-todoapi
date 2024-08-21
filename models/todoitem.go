@@ -39,13 +39,3 @@ type TodoItemCompletionUpdate struct {
 	Complete bool `json:"complete"`
 }
 
-// used to nest items within each other - map ensure no duplicate children
-type NestingTodoItem struct {
-	Id          string                     `json:"id"`
-	ListId      string                     `json:"list_id"`
-	Description string                     `json:"description"`
-	Complete    bool                       `json:"complete"`
-	Attachments []Attachment               `json:"attachments"`
-	SubItems    map[string]NestingTodoItem `json:"sub_items"`
-	ParentId    string                     `json:"parent_id"` // empty if no parent
-}
