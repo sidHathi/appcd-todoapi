@@ -14,6 +14,7 @@ RUN go mod download
 COPY ./models ./models
 COPY ./controllers ./controllers
 COPY ./services ./services
+COPY ./utils ./utils
 COPY ./db ./db
 COPY ./docs ./docs
 COPY main.go .
